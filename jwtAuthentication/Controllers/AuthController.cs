@@ -1,11 +1,14 @@
-﻿using jwtAuthentication.Dtos;
-using jwtAuthentication.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+
+using jwtAuthentication.Data;
+using jwtAuthentication.Models;
+using jwtAuthentication.Dtos;
+using Microsoft.EntityFrameworkCore;
 
 namespace jwtAuthentication.Controllers
 {
@@ -14,9 +17,11 @@ namespace jwtAuthentication.Controllers
 		public static User user = new User();
 
 		private readonly IConfiguration configuration;
-		public AuthController(IConfiguration configuration)
+		private readonly DataContext context;
+		public AuthController(IConfiguration configuration, DataContext context)
 		{
 			this.configuration = configuration;
+			this.context = context;
 		}
 
 		[HttpPost("register")]
@@ -46,6 +51,12 @@ namespace jwtAuthentication.Controllers
 
 			string token = CreateToken(user);
 			return Ok(token);
+		}
+
+		[HttpGet("getAllUsers")]
+		public async Task<ActionResult<List<User>>> getAllUsers()
+		{
+			return Ok(await context.Users.ToListAsync());
 		}
 
 		private string CreateToken(User user)
