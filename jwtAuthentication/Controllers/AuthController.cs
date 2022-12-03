@@ -1,7 +1,9 @@
 ﻿using jwtAuthentication.Dtos;
 using jwtAuthentication.Models;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -10,6 +12,12 @@ namespace jwtAuthentication.Controllers
 	public class AuthController : ControllerBase
 	{
 		public static User user = new User();
+
+		private readonly IConfiguration configuration;
+		public AuthController(IConfiguration configuration)
+		{
+			this.configuration = configuration;
+		}
 
 		[HttpPost("register")]
 		public async Task<ActionResult<User>> Register([FromBody] UserDto request)
@@ -36,7 +44,31 @@ namespace jwtAuthentication.Controllers
 				return BadRequest("Wrong password.");
 			}
 
-			return Ok("Deu certo.");
+			string token = CreateToken(user);
+			return Ok(token);
+		}
+
+		private string CreateToken(User user)
+		{
+			List<Claim> claims = new List<Claim>
+			{
+				new Claim(ClaimTypes.Name, user.Username)
+			};
+
+			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+				configuration.GetSection("AppSettings:Token").Value));
+
+			var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+			var token = new JwtSecurityToken(
+				claims: claims,
+				expires: DateTime.Now.AddDays(1),
+				signingCredentials: creds
+			);
+
+			var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+			return jwt;
 		}
 
 		private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
