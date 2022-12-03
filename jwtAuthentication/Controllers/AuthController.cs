@@ -24,21 +24,27 @@ namespace jwtAuthentication.Controllers
 			this.context = context;
 		}
 
-		[HttpPost("register")]
-		public async Task<ActionResult<User>> Register([FromBody] UserDto request)
+		[HttpPost("registerUser")]
+		public async Task<ActionResult<User>> registerUser([FromBody] UserDto request)
 		{
 			// passwordHash e passwordSalt atualizam por referência quando CreatePasswordHash() é executado
 			CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
-			user.Username = request.Username;
-			user.PasswordHash = passwordHash;
-			user.PasswordSalt = passwordSalt;
+			var newUser = new User
+			{
+				Username = request.Username,
+				PasswordHash = passwordHash,
+				PasswordSalt = passwordSalt
+			};
 
-			return Ok(user);
+			context.Users.Add(newUser);
+			await context.SaveChangesAsync();
+
+			return Ok(await context.Users.ToListAsync());
 		}
 
-		[HttpPost("login")]
-		public async Task<ActionResult<string>> Login([FromBody] UserDto request)
+		[HttpPost("loginUser")]
+		public async Task<ActionResult<string>> loginUser([FromBody] UserDto request)
 		{
 			if(user.Username != request.Username)
 			{
