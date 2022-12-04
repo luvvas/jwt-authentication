@@ -9,6 +9,7 @@ using jwtAuthentication.Data;
 using jwtAuthentication.Models;
 using jwtAuthentication.Dtos;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace jwtAuthentication.Controllers
 {
@@ -70,16 +71,50 @@ namespace jwtAuthentication.Controllers
 			return Ok(await context.Users.ToListAsync());
 		}
 
-		[HttpDelete("deleteUser")]
-		public async Task<ActionResult<List<User>>> deleteUser(Guid userId)
+		[HttpGet("getUser/{username}")]
+		public async Task<ActionResult<User>> getUser([FromRoute] string username)
 		{
-			var dbAuthor = await context.Users.FindAsync(userId);
-			if(dbAuthor == null)
+			var dbUser = await context.Users
+				.FirstOrDefaultAsync(u => u.Username.Equals(username));
+
+			if(dbUser == null)
 			{
-				return BadRequest("Author not found");
+				return BadRequest("User not found");
 			}
 
-			context.Users.Remove(dbAuthor);
+			return Ok(dbUser);
+		}
+
+		// Need to change password
+		[HttpPut("updateUser")]
+		public async Task<ActionResult<User>> updateUser([FromBody] User request)
+		{
+			var dbUser = await context.Users.FindAsync(request.UserId);
+
+			if(dbUser != null)
+			{
+				dbUser.Username = request.Username;
+
+				await context.SaveChangesAsync();
+			} else { 
+				return BadRequest("User not found");
+			}
+
+			return Ok(dbUser);
+		}
+
+		[HttpDelete("deleteUser/{username}")]
+		public async Task<ActionResult<List<User>>> deleteUser([FromRoute] string username)
+		{
+			var dbUser = await context.Users
+				.FirstOrDefaultAsync(u => u.Username.Equals(username));
+
+			if (dbUser == null)
+			{
+				return BadRequest("User not found");
+			}
+
+			context.Users.Remove(dbUser);
 			await this.context.SaveChangesAsync();
 
 			return Ok(await this.context.Users.ToListAsync());
