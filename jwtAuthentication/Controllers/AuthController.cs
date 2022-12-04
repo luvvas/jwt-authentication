@@ -14,7 +14,7 @@ namespace jwtAuthentication.Controllers
 {
 	public class AuthController : ControllerBase
 	{
-		public static User user = new User();
+		//public static User user = new User();
 
 		private readonly IConfiguration configuration;
 		private readonly DataContext context;
@@ -31,7 +31,7 @@ namespace jwtAuthentication.Controllers
 			CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
 			var newUser = new User
-			{
+			{ 
 				Username = request.Username,
 				PasswordHash = passwordHash,
 				PasswordSalt = passwordSalt
@@ -46,16 +46,21 @@ namespace jwtAuthentication.Controllers
 		[HttpPost("loginUser")]
 		public async Task<ActionResult<string>> loginUser([FromBody] UserDto request)
 		{
-			if(user.Username != request.Username)
+			var dbUser = await context.Users
+				.Where(u => u.Username.Contains(request.Username))
+				.FirstOrDefaultAsync();
+
+			if(dbUser == null)
 			{
 				return BadRequest("User not found.");
 			}
-			if(!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
+
+			if (!VerifyPasswordHash(request.Password, dbUser.PasswordHash, dbUser.PasswordSalt))
 			{
 				return BadRequest("Wrong password.");
 			}
 
-			string token = CreateToken(user);
+			string token = CreateToken(dbUser);
 			return Ok(token);
 		}
 
@@ -102,6 +107,7 @@ namespace jwtAuthentication.Controllers
 			using(var hmac = new HMACSHA512(passwordSalt))
 			{
 				var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+
 				return computedHash.SequenceEqual(passwordHash);
 			}
 		}
