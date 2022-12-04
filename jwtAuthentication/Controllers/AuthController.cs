@@ -70,6 +70,21 @@ namespace jwtAuthentication.Controllers
 			return Ok(await context.Users.ToListAsync());
 		}
 
+		[HttpDelete("deleteUser")]
+		public async Task<ActionResult<List<User>>> deleteUser(Guid userId)
+		{
+			var dbAuthor = await context.Users.FindAsync(userId);
+			if(dbAuthor == null)
+			{
+				return BadRequest("Author not found");
+			}
+
+			context.Users.Remove(dbAuthor);
+			await this.context.SaveChangesAsync();
+
+			return Ok(await this.context.Users.ToListAsync());
+		}
+
 		private string CreateToken(User user)
 		{
 			List<Claim> claims = new List<Claim>
