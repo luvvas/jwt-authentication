@@ -56,13 +56,6 @@ namespace jwtAuthentication.Controllers
 			return Ok(response);
 		}
 
-		[HttpGet("getUserByUserId/{userId}")]
-		public async Task<ActionResult<ServiceResponse<User>>> getUserByUserId([FromRoute] Guid userId)
-		{
-			var response = await authService.getUserByUserId(userId);
-			return Ok(response);
-		}
-
 		// Need to change password
 		[HttpPut("updateUser")]
 		public async Task<ActionResult<ServiceResponse<User>>> updateUser([FromBody] User request)

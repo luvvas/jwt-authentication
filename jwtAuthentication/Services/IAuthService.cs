@@ -9,7 +9,6 @@ namespace jwtAuthentication.Services
 		Task<ServiceResponse<User>> loginUser(UserDto request);
 		Task<ServiceResponse<List<User>>> getAllUsers();
 		Task<ServiceResponse<User>> getUserByUsername(string username);
-		Task<ServiceResponse<User>> getUserByUserId(Guid userId);
 		Task<ServiceResponse<User>> updateUser(User request);
 		Task<ServiceResponse<List<User>>> deleteUser(string username);
 	}
