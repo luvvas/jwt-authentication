@@ -71,11 +71,25 @@ namespace jwtAuthentication.Controllers
 			return Ok(await context.Users.ToListAsync());
 		}
 
-		[HttpGet("getUser/{username}")]
-		public async Task<ActionResult<User>> getUser([FromRoute] string username)
+		[HttpGet("getUserByUsername/{username}")]
+		public async Task<ActionResult<User>> getUserByUsername([FromRoute] string username)
 		{
 			var dbUser = await context.Users
 				.FirstOrDefaultAsync(u => u.Username.Equals(username));
+
+			if(dbUser == null)
+			{
+				return BadRequest("User not found");
+			}
+
+			return Ok(dbUser);
+		}
+
+		[HttpGet("getUserByUserId/{userId}")]
+		public async Task<ActionResult<User>> getUserByUserId([FromRoute] Guid userId)
+		{
+			var dbUser = await context.Users
+				.FindAsync(userId);
 
 			if(dbUser == null)
 			{
