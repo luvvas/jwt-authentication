@@ -27,6 +27,11 @@ namespace jwtAuthentication.Controllers
 		public async Task<ActionResult<ServiceResponse<List<User>>>> registerUser([FromBody] UserDto request)
 		{
 			var response = await authService.registerUser(request);
+			if (response.Data == null)
+			{
+				return NotFound(response);
+			}
+
 			return Ok(response);
 		}
 
@@ -46,6 +51,11 @@ namespace jwtAuthentication.Controllers
 		public async Task<ActionResult<ServiceResponse<List<User>>>> getAllUsers()
 		{
 			var response = await authService.getAllUsers();
+			if (response.Data == null)
+			{
+				return NotFound(response);
+			}
+
 			return Ok(response);
 		}
 
@@ -53,6 +63,11 @@ namespace jwtAuthentication.Controllers
 		public async Task<ActionResult<User>> getUserByUsername([FromRoute] string username)
 		{
 			var response = await authService.getUserByUsername(username);
+			if (response.Data == null)
+			{
+				return NotFound(response);
+			}
+
 			return Ok(response);
 		}
 
@@ -61,6 +76,11 @@ namespace jwtAuthentication.Controllers
 		public async Task<ActionResult<ServiceResponse<User>>> updateUser([FromBody] User request)
 		{
 			var response = await authService.updateUser(request);
+			if (response.Data == null)
+			{
+				return NotFound(response);
+			}
+
 			return Ok(response);
 		}
 
@@ -68,6 +88,11 @@ namespace jwtAuthentication.Controllers
 		public async Task<ActionResult<ServiceResponse<List<User>>>> deleteUser([FromRoute] string username)
 		{
 			var response = await authService.deleteUser(username);
+			if (response.Data == null)
+			{
+				return NotFound(response);
+			}
+
 			return Ok(response);
 		}
 	}
