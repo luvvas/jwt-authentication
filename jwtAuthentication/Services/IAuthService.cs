@@ -5,8 +5,8 @@ namespace jwtAuthentication.Services
 {
 	public interface IAuthService
 	{
-		Task<ServiceResponse<List<User>>> registerUser(UserDto request);
-		Task<ServiceResponse<User>> loginUser(UserDto request);
+		Task<ServiceResponse<List<User>>> registerUser(GetUserDto request);
+		Task<ServiceResponse<User>> loginUser(GetUserDto request);
 		Task<ServiceResponse<List<User>>> getAllUsers();
 		Task<ServiceResponse<User>> getUserByUsername(string username);
 		Task<ServiceResponse<User>> updateUser(User request);

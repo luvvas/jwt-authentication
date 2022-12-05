@@ -24,7 +24,7 @@ namespace jwtAuthentication.Controllers
 		}
 
 		[HttpPost("registerUser")]
-		public async Task<ActionResult<ServiceResponse<List<User>>>> registerUser([FromBody] UserDto request)
+		public async Task<ActionResult<ServiceResponse<List<User>>>> registerUser([FromBody] GetUserDto request)
 		{
 			var response = await authService.registerUser(request);
 			if (response.Data == null)
@@ -36,7 +36,7 @@ namespace jwtAuthentication.Controllers
 		}
 
 		[HttpPost("loginUser")]
-		public async Task<ActionResult<ServiceResponse<User>>> loginUser([FromBody] UserDto request)
+		public async Task<ActionResult<ServiceResponse<User>>> loginUser([FromBody] GetUserDto request)
 		{
 			var response = await authService.loginUser(request);
 			if (response.Data == null)

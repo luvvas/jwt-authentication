@@ -22,7 +22,7 @@ namespace jwtAuthentication.Services
 			this.context = context;
 		}
 
-		public async Task<ServiceResponse<List<User>>> registerUser(UserDto request)
+		public async Task<ServiceResponse<List<User>>> registerUser(GetUserDto request)
 		{
 			var serviceResponse = new ServiceResponse<List<User>>();
 
@@ -51,7 +51,7 @@ namespace jwtAuthentication.Services
 
 			return (serviceResponse);
 		}
-		public async Task<ServiceResponse<User>> loginUser(UserDto request)
+		public async Task<ServiceResponse<User>> loginUser(GetUserDto request)
 		{
 			var serviceResponse = new ServiceResponse<User>();
 
