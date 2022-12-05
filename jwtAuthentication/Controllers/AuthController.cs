@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -23,54 +24,58 @@ namespace jwtAuthentication.Controllers
 		}
 
 		[HttpPost("registerUser")]
-		public async Task<ActionResult<User>> registerUser([FromBody] UserDto request)
+		public async Task<ActionResult<ServiceResponse<List<User>>>> registerUser([FromBody] UserDto request)
 		{
 			var response = await authService.registerUser(request);
-
-			return response;
+			return Ok(response);
 		}
 
 		[HttpPost("loginUser")]
-		public async Task<ActionResult<string>> loginUser([FromBody] UserDto request)
+		public async Task<ActionResult<ServiceResponse<User>>> loginUser([FromBody] UserDto request)
 		{
 			var response = await authService.loginUser(request);
-			return response;
+			if (response.Data == null)
+			{
+				return NotFound(response);
+			}
+
+			return Ok(response);
 		}
 
 		[HttpGet("getAllUsers")]
-		public async Task<ActionResult<List<User>>> getAllUsers()
+		public async Task<ActionResult<ServiceResponse<List<User>>>> getAllUsers()
 		{
 			var response = await authService.getAllUsers();
-			return response;
+			return Ok(response);
 		}
 
 		[HttpGet("getUserByUsername/{username}")]
 		public async Task<ActionResult<User>> getUserByUsername([FromRoute] string username)
 		{
 			var response = await authService.getUserByUsername(username);
-			return response;
+			return Ok(response);
 		}
 
 		[HttpGet("getUserByUserId/{userId}")]
-		public async Task<ActionResult<User>> getUserByUserId([FromRoute] Guid userId)
+		public async Task<ActionResult<ServiceResponse<User>>> getUserByUserId([FromRoute] Guid userId)
 		{
 			var response = await authService.getUserByUserId(userId);
-			return response;
+			return Ok(response);
 		}
 
 		// Need to change password
 		[HttpPut("updateUser")]
-		public async Task<ActionResult<User>> updateUser([FromBody] User request)
+		public async Task<ActionResult<ServiceResponse<User>>> updateUser([FromBody] User request)
 		{
 			var response = await authService.updateUser(request);
-			return response;
+			return Ok(response);
 		}
 
 		[HttpDelete("deleteUser/{username}")]
-		public async Task<ActionResult<List<User>>> deleteUser([FromRoute] string username)
+		public async Task<ActionResult<ServiceResponse<List<User>>>> deleteUser([FromRoute] string username)
 		{
 			var response = await authService.deleteUser(username);
-			return response;
+			return Ok(response);
 		}
 	}
 }
