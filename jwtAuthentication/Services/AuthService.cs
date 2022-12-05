@@ -126,30 +126,7 @@ namespace jwtAuthentication.Services
 
 			return serviceResponse;
 		}
-		public async Task<ServiceResponse<User>> getUserByUserId(Guid userId)
-		{
-			var serviceResponse = new ServiceResponse<User>();
 
-			try
-			{
-				var dbUser = await context.Users
-					.FindAsync(userId);
-
-				if (dbUser == null)
-				{
-					return null;
-				}
-
-				serviceResponse.Data = dbUser;
-			} catch (Exception ex)
-			{
-				serviceResponse.Success = false;
-				serviceResponse.Message = ex.Message;
-			}
-
-
-			return serviceResponse;
-		}
 		public async Task<ServiceResponse<User>> updateUser(User request)
 		{
 			var serviceResponse = new ServiceResponse<User>();
