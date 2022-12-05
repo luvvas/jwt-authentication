@@ -22,9 +22,9 @@ namespace jwtAuthentication.Services
 			this.context = context;
 		}
 
-		public async Task<ServiceResponse<List<User>>> registerUser(GetUserDto request)
+		public async Task<ServiceResponse<List<GetUserDto>>> registerUser(CreateUserDto request)
 		{
-			var serviceResponse = new ServiceResponse<List<User>>();
+			var serviceResponse = new ServiceResponse<List<GetUserDto>>();
 
 			try
 			{
@@ -51,9 +51,9 @@ namespace jwtAuthentication.Services
 
 			return (serviceResponse);
 		}
-		public async Task<ServiceResponse<User>> loginUser(GetUserDto request)
+		public async Task<ServiceResponse<GetUserDto>> loginUser(CreateUserDto request)
 		{
-			var serviceResponse = new ServiceResponse<User>();
+			var serviceResponse = new ServiceResponse<GetUserDto>();
 
 			try
 			{
@@ -87,9 +87,9 @@ namespace jwtAuthentication.Services
 			return serviceResponse;
 		}
 
-		public async Task<ServiceResponse<List<User>>> getAllUsers()
+		public async Task<ServiceResponse<List<GetUserDto>>> getAllUsers()
 		{
-			var serviceResponse = new ServiceResponse<List<User>>();
+			var serviceResponse = new ServiceResponse<List<GetUserDto>>();
 
 			try
 			{
@@ -103,9 +103,9 @@ namespace jwtAuthentication.Services
 			return serviceResponse;
 		}
 
-		public async Task<ServiceResponse<User>> getUserByUsername(string username)
+		public async Task<ServiceResponse<GetUserDto>> getUserByUsername(string username)
 		{
-			var serviceResponse = new ServiceResponse<User>();
+			var serviceResponse = new ServiceResponse<GetUserDto>();
 
 			try
 			{
@@ -127,9 +127,9 @@ namespace jwtAuthentication.Services
 			return serviceResponse;
 		}
 
-		public async Task<ServiceResponse<User>> updateUser(User request)
+		public async Task<ServiceResponse<GetUserDto>> updateUser(UpdateUserDto request)
 		{
-			var serviceResponse = new ServiceResponse<User>();
+			var serviceResponse = new ServiceResponse<GetUserDto>();
 
 			try
 			{
@@ -156,9 +156,9 @@ namespace jwtAuthentication.Services
 
 			return serviceResponse;
 		}
-		public async Task<ServiceResponse<List<User>>> deleteUser(string username)
+		public async Task<ServiceResponse<List<GetUserDto>>> deleteUser(string username)
 		{
-			var serviceResponse = new ServiceResponse<List<User>>();
+			var serviceResponse = new ServiceResponse<List<GetUserDto>>();
 
 			var dbUser = await context.Users
 				.FirstOrDefaultAsync(u => u.Username.Equals(username));

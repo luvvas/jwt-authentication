@@ -24,7 +24,7 @@ namespace jwtAuthentication.Controllers
 		}
 
 		[HttpPost("registerUser")]
-		public async Task<ActionResult<ServiceResponse<List<User>>>> registerUser([FromBody] GetUserDto request)
+		public async Task<ActionResult<ServiceResponse<List<User>>>> registerUser([FromBody] CreateUserDto request)
 		{
 			var response = await authService.registerUser(request);
 			if (response.Data == null)
@@ -36,7 +36,7 @@ namespace jwtAuthentication.Controllers
 		}
 
 		[HttpPost("loginUser")]
-		public async Task<ActionResult<ServiceResponse<User>>> loginUser([FromBody] GetUserDto request)
+		public async Task<ActionResult<ServiceResponse<User>>> loginUser([FromBody] CreateUserDto request)
 		{
 			var response = await authService.loginUser(request);
 			if (response.Data == null)
@@ -73,7 +73,7 @@ namespace jwtAuthentication.Controllers
 
 		// Need to change password
 		[HttpPut("updateUser")]
-		public async Task<ActionResult<ServiceResponse<User>>> updateUser([FromBody] User request)
+		public async Task<ActionResult<ServiceResponse<User>>> updateUser([FromBody] UpdateUserDto request)
 		{
 			var response = await authService.updateUser(request);
 			if (response.Data == null)

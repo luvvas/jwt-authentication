@@ -5,11 +5,11 @@ namespace jwtAuthentication.Services
 {
 	public interface IAuthService
 	{
-		Task<ServiceResponse<List<User>>> registerUser(GetUserDto request);
-		Task<ServiceResponse<User>> loginUser(GetUserDto request);
-		Task<ServiceResponse<List<User>>> getAllUsers();
-		Task<ServiceResponse<User>> getUserByUsername(string username);
-		Task<ServiceResponse<User>> updateUser(User request);
-		Task<ServiceResponse<List<User>>> deleteUser(string username);
+		Task<ServiceResponse<List<GetUserDto>>> registerUser(CreateUserDto request);
+		Task<ServiceResponse<GetUserDto>> loginUser(CreateUserDto request);
+		Task<ServiceResponse<List<GetUserDto>>> getAllUsers();
+		Task<ServiceResponse<GetUserDto>> getUserByUsername(string username);
+		Task<ServiceResponse<GetUserDto>> updateUser(UpdateUserDto request);
+		Task<ServiceResponse<List<GetUserDto>>> deleteUser(string username);
 	}
 }
