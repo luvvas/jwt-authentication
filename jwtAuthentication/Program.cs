@@ -1,12 +1,30 @@
 global using Microsoft.EntityFrameworkCore;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
 using jwtAuthentication.Data;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAuthentication(
+  JwtBearerDefaults.AuthenticationScheme
+).AddJwtBearer(options =>
+{
+  options.TokenValidationParameters = new TokenValidationParameters
+  {
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
+      .GetBytes(builder.Configuration.GetSection("Appsettings:Token").Value)),
+    ValidateIssuer = false,
+    ValidateAudience = false
+  };
+});
 
 builder.Services
   .AddEntityFrameworkNpgsql()
@@ -24,6 +42,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
