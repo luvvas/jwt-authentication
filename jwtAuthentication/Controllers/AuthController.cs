@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -14,6 +15,10 @@ namespace jwtAuthentication.Controllers
 {
   public class AuthController : ControllerBase
   {
+    private static readonly string[] Summaries = new[]
+    {
+      "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+    };
     private readonly IConfiguration _configuration;
     private readonly DataContext _context;
     public AuthController(IConfiguration configuration, DataContext context)
@@ -59,11 +64,24 @@ namespace jwtAuthentication.Controllers
       return Ok(token);
     }
 
+    [HttpGet("getWeatherForecast"), Authorize(Roles = "Admin")]
+    public IEnumerable<WeatherForecast> Get()
+    {
+      return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+      {
+        Date = DateTime.Now.AddDays(index),
+        TemperatureC = Random.Shared.Next(-20, 55),
+        Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+      })
+      .ToArray();
+    }
+
     private string CreateToken(User user)
     {
       List<Claim> claims = new List<Claim>
       {
-        new Claim(ClaimTypes.Name, user.Username)
+        new Claim(ClaimTypes.Name, user.Username),
+        new Claim(ClaimTypes.Role, "Noob")
       };
 
       var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
