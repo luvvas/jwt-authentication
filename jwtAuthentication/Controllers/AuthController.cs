@@ -9,91 +9,96 @@ using System.Text;
 using jwtAuthentication.Data;
 using jwtAuthentication.Models;
 using jwtAuthentication.Dtos;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using jwtAuthentication.Services;
 
 namespace jwtAuthentication.Controllers
 {
-	public class AuthController : ControllerBase
-	{
-		private readonly IAuthService authService;
-		public AuthController(IAuthService authService)
-		{
-			this.authService = authService;
-		}
+  public class AuthController : ControllerBase
+  {
+    private readonly IConfiguration _configuration;
+    private readonly DataContext _context;
+    public AuthController(IConfiguration configuration, DataContext context)
+    {
+      _configuration = configuration;
+      _context = context;
+    }
 
-		[HttpPost("registerUser")]
-		public async Task<ActionResult<ServiceResponse<List<User>>>> registerUser([FromBody] CreateUserDto request)
-		{
-			var response = await authService.registerUser(request);
-			if (response.Data == null)
-			{
-				return NotFound(response);
-			}
+    [HttpPost("registerUser")]
+    public async Task<ActionResult<User>> registerUser([FromBody] UserDto request)
+    {
+      CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
-			return Ok(response);
-		}
+      var newUser = new User
+      {
+        Username = request.Username,
+        PasswordHash = passwordHash,
+        PasswordSalt = passwordSalt,
+      };
 
-		[HttpPost("loginUser")]
-		public async Task<ActionResult<ServiceResponse<User>>> loginUser([FromBody] CreateUserDto request)
-		{
-			var response = await authService.loginUser(request);
-			if (response.Data == null)
-			{
-				return NotFound(response);
-			}
+      _context.Users.Add(newUser);
+      await _context.SaveChangesAsync();
 
-			return Ok(response);
-		}
+      return Ok(newUser);
+    }
 
-		[HttpGet("getAllUsers")]
-		public async Task<ActionResult<ServiceResponse<List<User>>>> getAllUsers()
-		{
-			var response = await authService.getAllUsers();
-			if (response.Data == null)
-			{
-				return NotFound(response);
-			}
+    [HttpPost("loginUser")]
+    public async Task<ActionResult<string>> loginUser([FromBody] UserDto request)
+    {
+      var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
 
-			return Ok(response);
-		}
+      if (dbUser == null)
+      {
+        return BadRequest("User not found.");
+      }
 
-		[HttpGet("getUserByUsername/{username}")]
-		public async Task<ActionResult<User>> getUserByUsername([FromRoute] string username)
-		{
-			var response = await authService.getUserByUsername(username);
-			if (response.Data == null)
-			{
-				return NotFound(response);
-			}
+      if (!VerifyPasswordHash(request.Password, dbUser.PasswordHash, dbUser.PasswordSalt))
+      {
+        return BadRequest("Wrong password.");
+      }
 
-			return Ok(response);
-		}
+      string token = CreateToken(dbUser);
+      return Ok(token);
+    }
 
-		// Need to change password
-		[HttpPut("updateUser")]
-		public async Task<ActionResult<ServiceResponse<User>>> updateUser([FromBody] UpdateUserDto request)
-		{
-			var response = await authService.updateUser(request);
-			if (response.Data == null)
-			{
-				return NotFound(response);
-			}
+    private string CreateToken(User user)
+    {
+      List<Claim> claims = new List<Claim>
+      {
+        new Claim(ClaimTypes.Name, user.Username)
+      };
 
-			return Ok(response);
-		}
+      var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+        _configuration.GetSection("AppSettings:Token").Value));
 
-		[HttpDelete("deleteUser/{username}")]
-		public async Task<ActionResult<ServiceResponse<List<User>>>> deleteUser([FromRoute] string username)
-		{
-			var response = await authService.deleteUser(username);
-			if (response.Data == null)
-			{
-				return NotFound(response);
-			}
+      var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
-			return Ok(response);
-		}
-	}
+      var token = new JwtSecurityToken(
+        claims: claims,
+        expires: DateTime.Now.AddDays(1),
+        signingCredentials: creds
+      );
+
+      var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+      return jwt;
+    }
+
+    private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+    {
+      using (var hmac = new HMACSHA512())
+      {
+        passwordSalt = hmac.Key;
+        passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+      }
+    }
+
+    private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+    {
+      using (var hmac = new HMACSHA512(passwordSalt))
+      {
+        var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+        return computedHash.SequenceEqual(passwordHash);
+      }
+    }
+  }
 }
