@@ -13,6 +13,8 @@ using jwtAuthentication.Dtos;
 
 namespace jwtAuthentication.Controllers
 {
+  [Route("api/[controller]")]
+  [ApiController]
   public class AuthController : ControllerBase
   {
     private static readonly string[] Summaries = new[]
@@ -25,6 +27,17 @@ namespace jwtAuthentication.Controllers
     {
       _configuration = configuration;
       _context = context;
+    }
+
+    [HttpGet("getMe"), Authorize]
+    public ActionResult<object> GetMe()
+    {
+      // var userName = User?.Identity?.Name;
+      // or
+      var userName = User.FindFirstValue(ClaimTypes.Name);
+      var role = User.FindFirstValue(ClaimTypes.Role);
+
+      return Ok(new { userName, role });
     }
 
     [HttpPost("registerUser")]
