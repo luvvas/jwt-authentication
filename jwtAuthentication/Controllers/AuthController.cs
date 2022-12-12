@@ -23,21 +23,27 @@ namespace jwtAuthentication.Controllers
     };
     private readonly IConfiguration _configuration;
     private readonly DataContext _context;
-    public AuthController(IConfiguration configuration, DataContext context)
+    private readonly IUserService _userService;
+    public AuthController(IConfiguration configuration, DataContext context, IUserService userService)
     {
       _configuration = configuration;
       _context = context;
+      _userService = userService;
     }
 
     [HttpGet("getMe"), Authorize]
     public ActionResult<object> GetMe()
     {
+      var userName = _userService.GetMyName();
+
+      return Ok(userName);
+
       // var userName = User?.Identity?.Name;
       // or
-      var userName = User.FindFirstValue(ClaimTypes.Name);
-      var role = User.FindFirstValue(ClaimTypes.Role);
+      // var userName = User.FindFirstValue(ClaimTypes.Name);
+      // var role = User.FindFirstValue(ClaimTypes.Role);
 
-      return Ok(new { userName, role });
+      // return Ok(new { userName, role });
     }
 
     [HttpPost("registerUser")]

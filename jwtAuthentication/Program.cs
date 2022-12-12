@@ -1,4 +1,5 @@
 global using Microsoft.EntityFrameworkCore;
+global using jwtAuthentication.Services;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
@@ -12,6 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(options =>
 {
   options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
