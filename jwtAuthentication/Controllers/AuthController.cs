@@ -95,6 +95,7 @@ namespace jwtAuthentication.Controllers
       .ToArray();
     }
 
+    // Need to review
     private string CreateToken(User user)
     {
       List<Claim> claims = new List<Claim>
