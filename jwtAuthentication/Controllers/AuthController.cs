@@ -80,6 +80,10 @@ namespace jwtAuthentication.Controllers
       }
 
       string token = CreateToken(dbUser);
+
+      var refreshToken = GenerateRefreshToken();
+      SetRefreshToken(refreshToken, dbUser);
+
       return Ok(token);
     }
 
@@ -105,6 +109,20 @@ namespace jwtAuthentication.Controllers
       };
 
       return refreshToken;
+    }
+
+    private void SetRefreshToken(RefreshToken newRefreshToken, User dbUser)
+    {
+      var cookieOptions = new CookieOptions
+      {
+        HttpOnly = true,
+        Expires = newRefreshToken.Expires
+      };
+      Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
+
+      dbUser.RefreshToken = newRefreshToken.Token;
+      dbUser.TokenCreated = newRefreshToken.Created;
+      dbUser.TokenExpires = newRefreshToken.Expires;
     }
 
     // Need to review
