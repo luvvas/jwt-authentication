@@ -82,7 +82,31 @@ namespace jwtAuthentication.Controllers
       string token = CreateToken(dbUser);
 
       var refreshToken = GenerateRefreshToken();
-      SetRefreshToken(refreshToken, dbUser);
+      await SetRefreshToken(refreshToken, dbUser);
+
+      return Ok(token);
+    }
+
+    [HttpPost("refreshToken")]
+    public async Task<ActionResult<string>> RefreshToken()
+    {
+      var refreshToken = Request.Cookies["refreshToken"];
+
+      var dbUser = await _context.Users
+        .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+
+      if (dbUser == null)
+      {
+        return Unauthorized("Invalid Refresh Token.");
+      }
+      else if (dbUser.TokenExpires < DateTime.UtcNow)
+      {
+        return Unauthorized("Token expired.");
+      }
+
+      string token = CreateToken(dbUser);
+      var newRefreshToken = GenerateRefreshToken();
+      await SetRefreshToken(newRefreshToken, dbUser);
 
       return Ok(token);
     }
@@ -105,13 +129,13 @@ namespace jwtAuthentication.Controllers
       {
         Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
         Expires = DateTime.UtcNow.AddDays(7),
-        Created = DateTime.Now
+        Created = DateTime.UtcNow
       };
 
       return refreshToken;
     }
 
-    private void SetRefreshToken(RefreshToken newRefreshToken, User dbUser)
+    private async Task SetRefreshToken(RefreshToken newRefreshToken, User dbUser)
     {
       var cookieOptions = new CookieOptions
       {
@@ -123,6 +147,8 @@ namespace jwtAuthentication.Controllers
       dbUser.RefreshToken = newRefreshToken.Token;
       dbUser.TokenCreated = newRefreshToken.Created;
       dbUser.TokenExpires = newRefreshToken.Expires;
+
+      await _context.SaveChangesAsync();
     }
 
     // Need to review
